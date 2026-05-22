@@ -285,7 +285,7 @@ hr { border-color: #f0f0f8 !important; margin: 0.8rem 0 !important; }
 
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────────
-GROQ_API_KEY = st.secrets.get("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", "")
+GROQ_API_KEY = st.secrets.get("", "")
 GROQ_MODEL   = "llama-3.1-8b-instant"
 GROQ_URL     = "https://api.groq.com/openai/v1/chat/completions"
 
