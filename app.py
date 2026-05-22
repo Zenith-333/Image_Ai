@@ -3,418 +3,452 @@ import requests
 import urllib.parse
 import time
 
-# ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="MultiModal AI App",
-    page_icon="🧠",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    page_title="MultiModal AI",
+    page_icon="✦",
+    layout="centered",
+    initial_sidebar_state="collapsed",
 )
 
-# ── Custom CSS ─────────────────────────────────────────────────────────────────
+# ── Premium Light UI ───────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    /* Main background */
-    .stApp { background-color: #0f1117; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1a1d27 0%, #12151f 100%);
-        border-right: 1px solid #2d3047;
-    }
+*, html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif !important;
+}
 
-    /* Chat messages */
-    .user-bubble {
-        background: linear-gradient(135deg, #4f46e5, #7c3aed);
-        color: white;
-        padding: 12px 16px;
-        border-radius: 18px 18px 4px 18px;
-        margin: 6px 0;
-        max-width: 80%;
-        margin-left: auto;
-        font-size: 15px;
-        line-height: 1.5;
-        box-shadow: 0 2px 12px rgba(79, 70, 229, 0.3);
-    }
-    .assistant-bubble {
-        background: #1e2130;
-        color: #e2e8f0;
-        padding: 12px 16px;
-        border-radius: 18px 18px 18px 4px;
-        margin: 6px 0;
-        max-width: 80%;
-        font-size: 15px;
-        line-height: 1.5;
-        border: 1px solid #2d3047;
-    }
-    .bubble-label {
-        font-size: 11px;
-        color: #6b7280;
-        margin-bottom: 4px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
-    .right-label { text-align: right; }
+/* Hide Streamlit chrome */
+#MainMenu, footer, header,
+[data-testid="stSidebarNav"],
+[data-testid="collapsedControl"] { display: none !important; }
 
-    /* Image card */
-    .img-card {
-        background: #1e2130;
-        border: 1px solid #2d3047;
-        border-radius: 16px;
-        padding: 16px;
-        margin-top: 12px;
-    }
+/* Page background */
+.stApp {
+    background: #f7f8fc !important;
+}
+.block-container {
+    max-width: 780px !important;
+    padding: 2rem 1.5rem 4rem !important;
+}
 
-    /* Title styling */
-    .app-title {
-        font-size: 28px;
-        font-weight: 800;
-        background: linear-gradient(90deg, #818cf8, #c084fc);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 4px;
-    }
-    .app-subtitle {
-        color: #6b7280;
-        font-size: 13px;
-        margin-bottom: 20px;
-    }
+/* ── HEADER ── */
+.app-header {
+    text-align: center;
+    padding: 2.5rem 0 1.5rem;
+}
+.app-logo {
+    width: 48px; height: 48px;
+    background: #fff;
+    border: 1px solid #e4e6ef;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    font-size: 22px;
+    line-height: 1;
+}
+.app-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+}
+.app-sub {
+    font-size: 13px;
+    color: #9ca3af;
+    font-weight: 400;
+}
+.badge-row {
+    display: flex; gap: 6px; justify-content: center; margin-top: 10px;
+}
+.badge {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: #f0f0f8;
+    color: #6b73a8;
+    border: 1px solid #e4e6ef;
+}
 
-    /* Mode badges */
-    .badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        margin-right: 6px;
-    }
-    .badge-chat { background: #312e81; color: #a5b4fc; }
-    .badge-img  { background: #4a1d96; color: #d8b4fe; }
+/* ── TABS ── */
+.stTabs [data-baseweb="tab-list"] {
+    background: #fff !important;
+    border: 1px solid #e4e6ef !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #9ca3af !important;
+    padding: 8px 20px !important;
+    border: none !important;
+    transition: all 0.15s ease !important;
+}
+.stTabs [aria-selected="true"] {
+    background: #f4f3ff !important;
+    color: #5b52e8 !important;
+    box-shadow: 0 1px 3px rgba(91,82,232,0.15) !important;
+}
+.stTabs [data-baseweb="tab-highlight"] { display: none !important; }
+.stTabs [data-baseweb="tab-border"]    { display: none !important; }
 
-    /* Divider */
-    hr { border-color: #2d3047; }
+/* ── CHAT BUBBLES ── */
+.msg-wrap-user {
+    display: flex; justify-content: flex-end; margin: 8px 0;
+}
+.msg-wrap-ai {
+    display: flex; justify-content: flex-start; margin: 8px 0;
+}
+.bubble-user {
+    background: #5b52e8;
+    color: #fff;
+    padding: 11px 16px;
+    border-radius: 18px 18px 4px 18px;
+    max-width: 76%;
+    font-size: 14px;
+    line-height: 1.55;
+    font-weight: 400;
+}
+.bubble-ai {
+    background: #fff;
+    color: #1f2937;
+    padding: 11px 16px;
+    border-radius: 18px 18px 18px 4px;
+    max-width: 76%;
+    font-size: 14px;
+    line-height: 1.55;
+    border: 1px solid #e4e6ef;
+    font-weight: 400;
+}
+.chat-box {
+    background: #fff;
+    border: 1px solid #e4e6ef;
+    border-radius: 16px;
+    padding: 16px;
+    min-height: 380px;
+    max-height: 420px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+.chat-empty {
+    height: 340px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px; color: #9ca3af; text-align: center;
+}
+.chat-empty-icon {
+    font-size: 32px; opacity: 0.4;
+}
 
-    /* Input box override */
-    .stTextArea textarea {
-        background: #1e2130 !important;
-        color: #e2e8f0 !important;
-        border: 1px solid #3d4263 !important;
-        border-radius: 12px !important;
-    }
-    .stTextInput input {
-        background: #1e2130 !important;
-        color: #e2e8f0 !important;
-        border: 1px solid #3d4263 !important;
-        border-radius: 12px !important;
-    }
+/* ── INPUTS ── */
+.stTextArea textarea {
+    background: #fff !important;
+    border: 1px solid #e4e6ef !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    color: #1f2937 !important;
+    padding: 12px 14px !important;
+    transition: border-color 0.15s, box-shadow 0.15s !important;
+    resize: none !important;
+}
+.stTextArea textarea:focus {
+    border-color: #5b52e8 !important;
+    box-shadow: 0 0 0 3px rgba(91,82,232,0.1) !important;
+}
+.stTextArea textarea::placeholder { color: #c4c9d9 !important; }
 
-    /* Button */
-    .stButton > button {
-        background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-        padding: 10px 24px !important;
-        transition: opacity 0.2s !important;
-    }
-    .stButton > button:hover { opacity: 0.85 !important; }
+/* ── BUTTONS ── */
+.stButton > button {
+    background: #5b52e8 !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 10px 20px !important;
+    letter-spacing: 0.01em !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 1px 4px rgba(91,82,232,0.25) !important;
+}
+.stButton > button:hover {
+    background: #4a43d4 !important;
+    box-shadow: 0 4px 12px rgba(91,82,232,0.3) !important;
+    transform: translateY(-1px) !important;
+}
+.stButton > button:active { transform: translateY(0) !important; }
 
-    /* Metrics */
-    [data-testid="stMetric"] {
-        background: #1e2130;
-        border: 1px solid #2d3047;
-        border-radius: 12px;
-        padding: 10px;
-    }
+/* Secondary clear button */
+.stButton.secondary > button {
+    background: #fff !important;
+    color: #6b7280 !important;
+    border: 1px solid #e4e6ef !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+}
+.stButton.secondary > button:hover {
+    background: #f9fafb !important;
+    color: #374151 !important;
+}
+
+/* ── FORM ── */
+[data-testid="stForm"] {
+    background: #fff;
+    border: 1px solid #e4e6ef;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+[data-testid="stFormSubmitButton"] > button {
+    width: 100%;
+    justify-content: center;
+}
+
+/* ── SELECTBOX & SLIDERS ── */
+.stSelectbox > div > div {
+    background: #fff !important;
+    border: 1px solid #e4e6ef !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    color: #374151 !important;
+}
+.stSlider [data-baseweb="slider"] div[role="slider"] {
+    background: #5b52e8 !important;
+    border-color: #5b52e8 !important;
+}
+.stSlider [data-baseweb="slider"] div[data-testid="stTickBar"] { display: none !important; }
+
+/* ── TOGGLE ── */
+.stToggle label span { background: #5b52e8 !important; }
+
+/* ── IMAGE CARD ── */
+.img-card {
+    background: #fff;
+    border: 1px solid #e4e6ef;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.img-caption {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 10px;
+    line-height: 1.5;
+}
+.img-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #5b52e8;
+    font-weight: 500;
+    margin-top: 8px;
+    text-decoration: none;
+}
+
+/* ── INFO / ENHANCED PROMPT ── */
+.stAlert {
+    background: #f4f3ff !important;
+    border: 1px solid #d4d0fa !important;
+    border-radius: 10px !important;
+    color: #4a43d4 !important;
+    font-size: 13px !important;
+}
+
+/* ── GALLERY ── */
+.gallery-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: #9ca3af;
+    text-transform: uppercase;
+    margin: 1.2rem 0 0.6rem;
+}
+
+/* ── SPINNER ── */
+.stSpinner > div { border-top-color: #5b52e8 !important; }
+
+/* ── DIVIDER ── */
+hr { border-color: #f0f0f8 !important; margin: 0.8rem 0 !important; }
+
+/* Column gap fix */
+[data-testid="column"] { padding: 0 6px !important; }
 </style>
 """, unsafe_allow_html=True)
 
 
-# ── Groq API helper ────────────────────────────────────────────────────────────
-GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
+# ── CONFIG ─────────────────────────────────────────────────────────────────────
+GROQ_API_KEY = st.secrets.get("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", "")
 GROQ_MODEL   = "llama-3.1-8b-instant"
 GROQ_URL     = "https://api.groq.com/openai/v1/chat/completions"
 
 
-def chat_with_groq(messages: list, system_prompt: str = "") -> str:
+# ── HELPERS ────────────────────────────────────────────────────────────────────
+def chat_with_groq(messages: list) -> str:
     if not GROQ_API_KEY:
-        return "⚠️ No GROQ_API_KEY found. Add it in `.streamlit/secrets.toml`."
-
-    payload_messages = []
-    if system_prompt:
-        payload_messages.append({"role": "system", "content": system_prompt})
-    payload_messages.extend(messages)
-
+        return "⚠️ No GROQ_API_KEY — add it in Streamlit Cloud Secrets."
     try:
-        resp = requests.post(
+        r = requests.post(
             GROQ_URL,
-            headers={
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json",
-            },
+            headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
             json={
                 "model": GROQ_MODEL,
-                "messages": payload_messages,
+                "messages": [{"role": "system", "content": "You are a helpful, smart, concise AI assistant."}] + messages,
                 "temperature": 0.7,
                 "max_tokens": 1024,
             },
             timeout=30,
         )
-        resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"]
-    except requests.exceptions.HTTPError as e:
-        return f"❌ Groq API Error: {e.response.status_code} — {e.response.text}"
+        r.raise_for_status()
+        return r.json()["choices"][0]["message"]["content"]
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        return f"❌ {str(e)}"
 
 
-# ── Image generation via Pollinations.ai (free, no key) ────────────────────────
-def generate_image_url(prompt: str, width: int = 768, height: int = 512, seed: int = None) -> str:
-    encoded = urllib.parse.quote(prompt)
-    seed_str = f"&seed={seed}" if seed else ""
-    return f"https://image.pollinations.ai/prompt/{encoded}?width={width}&height={height}&nologo=true{seed_str}"
+def enhance_prompt(raw: str) -> str:
+    msgs = [{"role": "user", "content": f"Rewrite into a vivid, detailed image generation prompt (1-2 sentences). Return ONLY the improved prompt:\n\n{raw}"}]
+    return chat_with_groq(msgs)
 
 
-def enhance_prompt_with_groq(raw_prompt: str) -> str:
-    """Ask Groq to improve the image prompt for better results."""
-    messages = [{"role": "user", "content": f"Improve this image generation prompt into a detailed, vivid, artistic description in 1-2 sentences. Only return the improved prompt, nothing else.\n\nOriginal: {raw_prompt}"}]
-    return chat_with_groq(messages)
+def image_url(prompt: str, w: int = 768, h: int = 512) -> str:
+    seed = int(time.time())
+    return f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}?width={w}&height={h}&seed={seed}&nologo=true"
 
 
-# ── Session state init ─────────────────────────────────────────────────────────
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-if "image_history" not in st.session_state:
-    st.session_state.image_history = []
-if "total_messages" not in st.session_state:
-    st.session_state.total_messages = 0
-if "total_images" not in st.session_state:
-    st.session_state.total_images = 0
+# ── SESSION STATE ──────────────────────────────────────────────────────────────
+for k, v in [("chat_history", []), ("image_history", [])]:
+    if k not in st.session_state:
+        st.session_state[k] = v
 
 
-# ── Sidebar ────────────────────────────────────────────────────────────────────
-with st.sidebar:
-    st.markdown('<div class="app-title">🧠 MultiModal AI</div>', unsafe_allow_html=True)
-    st.markdown('<div class="app-subtitle">Artificial Intelligence Lab 10.0 · NLP</div>', unsafe_allow_html=True)
+# ── HEADER ────────────────────────────────────────────────────────────────────
+st.markdown("""
+<div class="app-header">
+  <div class="app-logo">✦</div>
+  <div class="app-title">MultiModal AI</div>
+  <div class="app-sub">Artificial Intelligence · Lab 10.0 · NLP</div>
+  <div class="badge-row">
+    <span class="badge">llama-3.1-8b-instant</span>
+    <span class="badge">Groq</span>
+    <span class="badge">Pollinations.ai</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("---")
 
-    mode = st.radio(
-        "**Select Mode**",
-        ["💬 Chat", "🎨 Image Generator", "🔀 Combined"],
-        index=0,
-    )
+# ── TABS ──────────────────────────────────────────────────────────────────────
+tab_chat, tab_img = st.tabs(["  💬  Chat  ", "  🎨  Image Generator  "])
 
-    st.markdown("---")
 
-    # System prompt for chat
-    if "💬" in mode or "🔀" in mode:
-        st.markdown("**🤖 Assistant Persona**")
-        system_prompt = st.text_area(
-            "System Prompt",
-            value="You are a helpful, smart, and friendly AI assistant. Be concise but informative.",
-            height=100,
-            label_visibility="collapsed",
-        )
+# ════════════════════════════════════════════════════════════════════════════════
+# CHAT TAB
+# ════════════════════════════════════════════════════════════════════════════════
+with tab_chat:
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+    # Message display
+    chat_html = '<div class="chat-box">'
+    if not st.session_state.chat_history:
+        chat_html += '''
+        <div class="chat-empty">
+          <div class="chat-empty-icon">💬</div>
+          <div style="font-size:14px;font-weight:500;color:#6b7280;">Start a conversation</div>
+          <div style="font-size:12px;color:#c4c9d9;">Powered by Groq · LLaMA 3.1</div>
+        </div>'''
     else:
-        system_prompt = ""
-
-    # Image settings
-    if "🎨" in mode or "🔀" in mode:
-        st.markdown("**🖼️ Image Settings**")
-        img_width  = st.select_slider("Width",  options=[512, 640, 768, 1024], value=768)
-        img_height = st.select_slider("Height", options=[512, 640, 768, 1024], value=512)
-        enhance    = st.toggle("✨ Auto-enhance prompt with AI", value=True)
-        img_style  = st.selectbox(
-            "Style Preset",
-            ["None", "photorealistic", "anime", "watercolor", "oil painting",
-             "digital art", "cinematic", "pixel art", "3D render"],
-        )
-
-    st.markdown("---")
-
-    # Stats
-    col1, col2 = st.columns(2)
-    col1.metric("💬 Chats", st.session_state.total_messages)
-    col2.metric("🖼️ Images", st.session_state.total_images)
-
-    st.markdown("---")
-    st.caption(f"**Model:** {GROQ_MODEL}")
-    st.caption("**Images:** Pollinations.ai (free)")
-
-    if st.button("🗑️ Clear History", use_container_width=True):
-        st.session_state.chat_history = []
-        st.session_state.image_history = []
-        st.rerun()
-
-
-# ── Main area ──────────────────────────────────────────────────────────────────
-
-# ── CHAT MODE ──────────────────────────────────────────────────────────────────
-if "💬" in mode:
-    st.markdown("## 💬 Chat with AI")
-    st.caption(f"Powered by Groq · {GROQ_MODEL}")
-    st.markdown("---")
-
-    # Display conversation
-    chat_container = st.container()
-    with chat_container:
-        if not st.session_state.chat_history:
-            st.info("👋 Start a conversation below!")
         for msg in st.session_state.chat_history:
+            txt = msg["content"].replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
             if msg["role"] == "user":
-                st.markdown(f'<div class="right-label bubble-label">You</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="user-bubble">{msg["content"]}</div>', unsafe_allow_html=True)
+                chat_html += f'<div class="msg-wrap-user"><div class="bubble-user">{txt}</div></div>'
             else:
-                st.markdown(f'<div class="bubble-label">🤖 Assistant</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="assistant-bubble">{msg["content"]}</div>', unsafe_allow_html=True)
+                chat_html += f'<div class="msg-wrap-ai"><div class="bubble-ai">{txt}</div></div>'
+    chat_html += '</div>'
+    st.markdown(chat_html, unsafe_allow_html=True)
 
-    st.markdown("---")
-
-    # Input
+    # Input form
     with st.form("chat_form", clear_on_submit=True):
-        user_input = st.text_area("Your message", placeholder="Ask me anything…", height=80, label_visibility="collapsed")
-        submitted  = st.form_submit_button("Send ➤", use_container_width=True)
+        user_input = st.text_area(
+            "msg", placeholder="Type your message… (Enter to send)",
+            height=80, label_visibility="collapsed"
+        )
+        c1, c2 = st.columns([4, 1])
+        with c1:
+            sent = st.form_submit_button("Send  ➤", use_container_width=True)
+        with c2:
+            cleared = st.form_submit_button("Clear", use_container_width=True)
 
-    if submitted and user_input.strip():
+    if sent and user_input.strip():
         st.session_state.chat_history.append({"role": "user", "content": user_input.strip()})
         with st.spinner("Thinking…"):
-            response = chat_with_groq(st.session_state.chat_history, system_prompt)
-        st.session_state.chat_history.append({"role": "assistant", "content": response})
-        st.session_state.total_messages += 1
+            reply = chat_with_groq(st.session_state.chat_history)
+        st.session_state.chat_history.append({"role": "assistant", "content": reply})
+        st.rerun()
+
+    if cleared:
+        st.session_state.chat_history = []
         st.rerun()
 
 
-# ── IMAGE GENERATOR MODE ───────────────────────────────────────────────────────
-elif "🎨" in mode:
-    st.markdown("## 🎨 AI Image Generator")
-    st.caption("Powered by Pollinations.ai · Free & unlimited")
-    st.markdown("---")
+# ════════════════════════════════════════════════════════════════════════════════
+# IMAGE TAB
+# ════════════════════════════════════════════════════════════════════════════════
+with tab_img:
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
     with st.form("img_form", clear_on_submit=True):
         prompt_input = st.text_area(
-            "Image Prompt",
-            placeholder="Describe the image you want to generate…",
-            height=80,
-            label_visibility="collapsed",
+            "prompt", placeholder="Describe the image you want to generate…",
+            height=90, label_visibility="collapsed"
         )
-        gen_btn = st.form_submit_button("🎨 Generate Image", use_container_width=True)
 
-    if gen_btn and prompt_input.strip():
-        final_prompt = prompt_input.strip()
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            style = st.selectbox("Style", ["None", "photorealistic", "anime",
+                                           "watercolor", "oil painting",
+                                           "digital art", "cinematic", "3D render"],
+                                 label_visibility="visible")
+        with c2:
+            width = st.select_slider("Width", options=[512, 640, 768, 1024], value=768)
+        with c3:
+            height = st.select_slider("Height", options=[512, 640, 768, 1024], value=512)
 
-        # Add style preset
-        if img_style != "None":
-            final_prompt += f", {img_style} style"
+        enhance = st.toggle("✦ Enhance prompt with AI", value=True)
+        gen = st.form_submit_button("Generate Image  →", use_container_width=True)
 
-        # Enhance with Groq
+    if gen and prompt_input.strip():
+        final = prompt_input.strip()
+        if style != "None":
+            final += f", {style} style"
+
         if enhance:
-            with st.spinner("✨ Enhancing prompt with AI…"):
-                final_prompt = enhance_prompt_with_groq(final_prompt)
-            st.info(f"**Enhanced prompt:** {final_prompt}")
+            with st.spinner("Enhancing prompt…"):
+                final = enhance_prompt(final)
+            st.info(f"**Enhanced →** {final}")
 
-        # Generate image
-        with st.spinner("🎨 Generating image…"):
-            seed = int(time.time())
-            img_url = generate_image_url(final_prompt, img_width, img_height, seed)
-            # Small delay so Pollinations renders it
+        with st.spinner("Generating image…"):
+            url = image_url(final, width, height)
             time.sleep(2)
 
         st.markdown('<div class="img-card">', unsafe_allow_html=True)
-        st.image(img_url, caption=final_prompt[:80] + "…" if len(final_prompt) > 80 else final_prompt, use_container_width=True)
-        st.markdown(f"[🔗 Open full image]({img_url})")
+        st.image(url, use_container_width=True)
+        caption = final if len(final) <= 90 else final[:90] + "…"
+        st.markdown(f'<div class="img-caption">{caption}</div>', unsafe_allow_html=True)
+        st.markdown(f'<a class="img-link" href="{url}" target="_blank">↗ Open full image</a>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Save to history
-        st.session_state.image_history.append({"prompt": final_prompt, "url": img_url})
-        st.session_state.total_images += 1
+        st.session_state.image_history.insert(0, {"url": url, "prompt": final})
 
-    # Image history gallery
+    # Gallery
     if st.session_state.image_history:
-        st.markdown("---")
-        st.markdown("### 🖼️ Generated Gallery")
+        st.markdown('<div class="gallery-label">Recent</div>', unsafe_allow_html=True)
         cols = st.columns(3)
-        for i, item in enumerate(reversed(st.session_state.image_history[-9:])):
+        for i, item in enumerate(st.session_state.image_history[:6]):
             with cols[i % 3]:
-                st.image(item["url"], caption=item["prompt"][:40] + "…", use_container_width=True)
-
-
-# ── COMBINED MODE ──────────────────────────────────────────────────────────────
-else:
-    st.markdown("## 🔀 Multi-Modal AI — Chat + Image")
-    st.caption("Chat with Groq LLaMA · Generate images with Pollinations.ai")
-    st.markdown("---")
-
-    tab1, tab2 = st.tabs(["💬 Chat", "🎨 Image Generator"])
-
-    # --- Chat tab ---
-    with tab1:
-        chat_container = st.container()
-        with chat_container:
-            if not st.session_state.chat_history:
-                st.info("👋 Start a conversation below!")
-            for msg in st.session_state.chat_history:
-                if msg["role"] == "user":
-                    st.markdown(f'<div class="right-label bubble-label">You</div>', unsafe_allow_html=True)
-                    st.markdown(f'<div class="user-bubble">{msg["content"]}</div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<div class="bubble-label">🤖 Assistant</div>', unsafe_allow_html=True)
-                    st.markdown(f'<div class="assistant-bubble">{msg["content"]}</div>', unsafe_allow_html=True)
-
-        st.markdown("---")
-        with st.form("combined_chat_form", clear_on_submit=True):
-            user_input = st.text_area("Your message", placeholder="Ask me anything…", height=80, label_visibility="collapsed")
-            submitted  = st.form_submit_button("Send ➤", use_container_width=True)
-
-        if submitted and user_input.strip():
-            st.session_state.chat_history.append({"role": "user", "content": user_input.strip()})
-            with st.spinner("Thinking…"):
-                response = chat_with_groq(st.session_state.chat_history, system_prompt)
-            st.session_state.chat_history.append({"role": "assistant", "content": response})
-            st.session_state.total_messages += 1
-            st.rerun()
-
-    # --- Image tab ---
-    with tab2:
-        with st.form("combined_img_form", clear_on_submit=True):
-            prompt_input = st.text_area(
-                "Image Prompt",
-                placeholder="Describe the image you want to generate…",
-                height=80,
-                label_visibility="collapsed",
-            )
-            c1, c2, c3 = st.columns(3)
-            w2 = c1.select_slider("Width",  options=[512, 640, 768, 1024], value=768)
-            h2 = c2.select_slider("Height", options=[512, 640, 768, 1024], value=512)
-            style2 = c3.selectbox("Style", ["None", "photorealistic", "anime", "watercolor", "oil painting", "digital art", "cinematic"])
-            enhance2 = st.toggle("✨ Auto-enhance prompt", value=True)
-            gen_btn2 = st.form_submit_button("🎨 Generate Image", use_container_width=True)
-
-        if gen_btn2 and prompt_input.strip():
-            final_prompt = prompt_input.strip()
-            if style2 != "None":
-                final_prompt += f", {style2} style"
-            if enhance2:
-                with st.spinner("✨ Enhancing prompt…"):
-                    final_prompt = enhance_prompt_with_groq(final_prompt)
-                st.info(f"**Enhanced:** {final_prompt}")
-
-            with st.spinner("🎨 Generating image…"):
-                seed = int(time.time())
-                img_url = generate_image_url(final_prompt, w2, h2, seed)
-                time.sleep(2)
-
-            st.image(img_url, caption=final_prompt[:80], use_container_width=True)
-            st.markdown(f"[🔗 Open full image]({img_url})")
-            st.session_state.image_history.append({"prompt": final_prompt, "url": img_url})
-            st.session_state.total_images += 1
-
-        if st.session_state.image_history:
-            st.markdown("---")
-            st.markdown("### 🖼️ Gallery")
-            gcols = st.columns(3)
-            for i, item in enumerate(reversed(st.session_state.image_history[-6:])):
-                with gcols[i % 3]:
-                    st.image(item["url"], caption=item["prompt"][:40] + "…", use_container_width=True)
+                st.image(item["url"], caption=item["prompt"][:38] + "…", use_container_width=True)
